@@ -1,115 +1,131 @@
-# SDN Flow Rule Timeout Manager (Mininet + POX)
+# SDN Flow Rule Timeout Manager using POX & Mininet
 
-## Problem Statement
+## Project Overview
 
-This project implements a Software Defined Networking (SDN) solution using Mininet and a POX controller. The objective is to demonstrate flow rule installation with timeout-based management, where rules automatically expire and are dynamically reinstalled when new traffic arrives.
-
----
-
-### Setup Instructions
-
-### 1. Install Mininet
-
-sudo apt install mininet
-
-### 2. Clone POX Controller
-
-git clone https://github.com/noxrepo/pox
-cd pox
-
-### 3. Run Controller
-
-python3.8 pox.py log.level --DEBUG timeout_controller
-
-### 4. Run Mininet
-
-sudo mn --topo single,3 --controller=remote
+This project demonstrates dynamic flow rule management in a Software Defined Networking (SDN) environment using the POX controller and Mininet. The controller installs flow rules based on traffic and removes them automatically using timeout mechanisms.
 
 ---
 
-## Implementation Details
+## Objectives
 
-* Implemented a learning switch using POX controller
-
-* Controller handles PacketIn events
-
-* Flow rules are installed using OpenFlow protocol
-
-* Each flow rule includes:
-
-  * Source MAC address match
-  * Destination MAC address match
-  * Output port action
-
-* Timeout mechanism implemented:
-
-  * idle_timeout = 10 seconds
-  * hard_timeout = 10 seconds
-
-* Flow rules are automatically removed after timeout
-
-* New packets trigger reinstallation of flow rules
+* Implement controller–switch interaction using OpenFlow
+* Design match–action flow rules
+* Apply timeout-based rule management
+* Observe and analyze network behavior
 
 ---
 
-## Test Scenarios
+## Key Features
 
-### Scenario 1: Normal Communication
-
-* Run: pingall
-* All hosts successfully communicate
-* Flow rules are installed in the switch
-
-### Scenario 2: Timeout Behavior
-
-* Run: pingall
-* Wait for 10–15 seconds
-* Run: pingall again
-* Controller reinstalls flow rules
+* Learning switch functionality
+* Dynamic flow rule installation
+* Idle timeout-based flow removal
+* Flow lifecycle tracking (FlowRemoved events)
+* Automatic rule reinstallation after timeout
 
 ---
 
-## Flow Table Observation (Flow History)
+## Architecture
 
-Flow entries are observed using:
+The system follows SDN architecture:
 
-sh ovs-ofctl dump-flows s1
-
-Each flow entry contains:
-
-* n_packets → number of packets matched
-* n_bytes → amount of data transferred
-* duration → how long the flow existed
-* idle_timeout → removed if no activity
-* hard_timeout → removed after fixed time
-
-This represents the history and statistics of each flow.
+* **Control Plane:** POX Controller (decision making)
+* **Data Plane:** OpenFlow switch (packet forwarding)
+* Communication via OpenFlow protocol
 
 ---
 
-## Proof of Execution
+## Topology
 
-Screenshots included:
+* 1 Switch (s1)
+* 3 Hosts (h1, h2, h3)
+
+Created using:
+
+```bash
+sudo mn --topo single,3 --controller=remote --mac
+```
+
+---
+
+## Setup & Execution
+
+### 1. Start Controller
+
+```bash
+cd ~/pox
+./pox.py log.level --INFO ext.timeout_controller
+```
+
+### 2. Start Mininet
+
+```bash
+sudo mn --topo single,3 --controller=remote --mac
+```
+
+### 3. Test Connectivity
+
+```bash
+h1 ping -c 1 h2
+h1 ping -c 1 h3
+h2 ping -c 1 h3
+```
+
+---
+
+## Working Principle
+
+1. Switch sends **PacketIn** to controller
+2. Controller learns MAC address mapping
+3. Flow rule is installed (match + action)
+4. Packet is forwarded immediately
+5. Flow expires after idle timeout
+6. New PacketIn triggers reinstallation
+
+---
+
+## Observations & Results
+
+* Initial packets trigger controller interaction (higher latency)
+* Subsequent packets are faster due to installed flow rules
+* Flow entries are removed after timeout
+* New rules are created when traffic resumes
+
+---
+
+## Validation & Regression Testing
+
+* Repeated ping tests confirm consistent timeout behavior
+* Flow rules expire and reinstall correctly each time
+
+---
+
+## Demo Outputs
 
 * Controller logs showing flow installation
-* Successful ping results (0% packet loss)
-* Flow table entries with packet and byte counters
-* Timeout behavior (flow removal and reinstallation)
+* Mininet ping results (0% packet loss)
+* Flow table entries using:
+
+```bash
+dpctl dump-flows
+```
 
 ---
 
-## Concepts Used
+## Code
 
-* Software Defined Networking (SDN)
-* OpenFlow Protocol
-* Flow Tables (match-action rules)
-* Idle Timeout and Hard Timeout
-* Controller–Switch interaction
+Main implementation:
+
+* `timeout_controller.py`
 
 ---
 
 ## Conclusion
 
-This project demonstrates how SDN controllers dynamically manage flow rules using timeout mechanisms. Flow entries are automatically removed after a fixed duration and reinstalled when new traffic is detected, ensuring efficient and flexible network control.
+This project demonstrates efficient and dynamic flow rule management using SDN principles. Timeout-based rule handling improves flexibility and ensures optimal network performance.
 
--------
+---
+
+## Repository
+
+GitHub: https://github.com/ANWESHA-MANIK/CN-SDN-FLOW-TIMEOUT-MANAGER
