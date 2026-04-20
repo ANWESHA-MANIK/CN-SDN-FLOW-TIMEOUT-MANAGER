@@ -120,6 +120,20 @@ Main implementation:
 
 ---
 
+## 📷 Demo Screenshots
+
+### 🔹 Controller Logs
+![Controller Logs](screenshots/controller_logs.png)
+
+### 🔹 Mininet Topology
+![Mininet Topology](screenshots/mininet_topology.png)
+
+### 🔹 Ping Results
+![Ping Results](screenshots/ping_results.png)
+
+### 🔹 Flow Table
+![Flow Table](screenshots/flow_table.png)
+
 ## Conclusion
 
 This project demonstrates efficient and dynamic flow rule management using SDN principles. Timeout-based rule handling improves flexibility and ensures optimal network performance.
